@@ -1,31 +1,21 @@
-const TelegramBot = require("node-telegram-bot-api");
-const randomstring = require("randomstring");
+const Telegraf = require('telegraf')
+const Extra = require('telegraf/extra')
+const Markup = require('telegraf/markup')
+const generate = require('./passwordGenerator')
 
-// Token bot Telegram yang didapat dari BotFather
-const token = "5921091811:AAENynl6Xpn7o972cxDPIjV2S194WXhfWlY";
+const bot = new Telegraf(YOUR_BOT_TOKEN)
 
-const bot = new TelegramBot(token, { polling: true });
-let helloWorldSent = false;
-let generate = false;
+bot.command('password', (ctx) => {
+    ctx.reply('Masukkan panjang password yang diinginkan:')
+    bot.on('message', (ctx) => {
+        const length = parseInt(ctx.message.text)
+        if(isNaN(length)) {
+            ctx.reply('Input tidak valid, harap masukkan angka')
+        } else {
+            const password = generate.generatePassword(length)
+            ctx.reply(`Password: ${password}`)
+        }
+    })
+})
 
-bot.on("message", (msg) => {
-  const chatId = msg.chat.id;
-
-  if (!helloWorldSent) {
-    bot.sendMessage(chatId, "Hello, world!");
-    helloWorldSent = true;
-  }
-  if (!generate) {
-    bot.onText(/\/generate (.+)/, (msg, match) => {
-      const chatId = msg.chat.id;
-      const passwordLength = match[1];
-      const password = randomstring.generate({
-        length: passwordLength,
-        charset: "alphanumeric",
-      });
-      bot.sendMessage(chatId, `Password Anda: ${password}`);
-    });
-    generate = true;
-  }
-});
-``;
+bot.launch()
